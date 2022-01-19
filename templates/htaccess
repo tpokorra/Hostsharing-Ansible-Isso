@@ -1,0 +1,4 @@
+PassengerFriendlyErrorPages off
+PassengerPython /home/pacs/{{pac}}/users/{{user}}/isso/.venv/bin/python3
+SetEnv PYTHONPATH /home/pacs/{{pac}}/users/{{user}}/isso
+SetEnv ISSO_SETTINGS /home/pacs/{{pac}}/users/{{user}}/etc/isso.conf

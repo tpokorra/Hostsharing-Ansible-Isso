@@ -1,0 +1,1 @@
+from isso.dispatch import application

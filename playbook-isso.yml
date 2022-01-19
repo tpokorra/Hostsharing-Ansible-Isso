@@ -5,10 +5,12 @@
     # see https://docs.ansible.com/ansible/latest/user_guide/become.html#risks-of-becoming-an-unprivileged-user
     ansible_common_remote_group: "{{pac}}"
     ansible_remote_tmp: ~/.ansible/tmp
+    virtualenv_dir: "/home/pacs/{{pac}}/users/{{user}}/isso/.venv"
 
   tasks:
-  - name: Create user, domain and database
+  - name: Create user and domain
     import_tasks: tasks/hs_basis.yml
+
 
   #################################
   ## create directories
@@ -19,47 +21,72 @@
     file:
       path: "/home/pacs/{{pac}}/users/{{user}}/etc"
       state: directory
-  - name: create directory var/tmp
+  - name: create directory var
     become: yes
     become_user: "{{pac}}-{{user}}"
     file:
-      path: "/home/pacs/{{pac}}/users/{{user}}/var/tmp"
-      state: directory
-  - name: create directory var/log
-    become: yes
-    become_user: "{{pac}}-{{user}}"
-    file:
-      path: "/home/pacs/{{pac}}/users/{{user}}/var/log"
-      state: directory
-  - name: create directory var/run
-    become: yes
-    become_user: "{{pac}}-{{user}}"
-    file:
-      path: "/home/pacs/{{pac}}/users/{{user}}/var/run"
+      path: "/home/pacs/{{pac}}/users/{{user}}/var"
       state: directory
 
 
   ##################################
   ## install isso
   ##################################
+  - name: create directory isso
+    become: yes
+    become_user: "{{pac}}-{{user}}"
+    file:
+      path: "/home/pacs/{{pac}}/users/{{user}}/isso"
+      state: directory
+  - name: upload requirements.txt for pip
+    become: yes
+    become_user: "{{pac}}-{{user}}"
+    copy:
+      src: "templates/requirements.txt"
+      dest: "/home/pacs/{{pac}}/users/{{user}}/isso/requirements.txt"
+  - name: Initiate virtualenv
+    become: yes
+    become_user: "{{pac}}-{{user}}"
+    pip: virtualenv="{{ virtualenv_dir }}"
+      requirements="/home/pacs/{{pac}}/users/{{user}}/isso/requirements.txt"
 
-  # TODO
 
   ##################################
   ## configuration
   ##################################
-
-  # TODO
-
-  ######################
-  ## initialise instance
-  ######################
-
-  # TODO
+  - name: upload configuration file
+    become: yes
+    become_user: "{{pac}}-{{user}}"
+    template:
+      src: "templates/isso.conf"
+      dest: "/home/pacs/{{pac}}/users/{{user}}/etc/isso.conf"
 
   ########################
   ## setup the apache site
   ########################
-
-  # TODO
+  - name: drop htdocs-ssl
+    become: yes
+    become_user: "{{pac}}-{{user}}"
+    file:
+       path: "/home/pacs/{{pac}}/users/{{user}}/doms/{{domain}}/htdocs-ssl"
+       state: absent
+  - name: create symbolic link for htdocs-ssl
+    become: yes
+    become_user: "{{pac}}-{{user}}"
+    file:
+      src: "/home/pacs/{{pac}}/users/{{user}}/isso/.venv/lib/python3.7/site-packages/isso"
+      dest: "/home/pacs/{{pac}}/users/{{user}}/doms/{{domain}}/htdocs-ssl"
+      state: link
+  - name: upload .htaccess file
+    become: yes
+    become_user: "{{pac}}-{{user}}"
+    template:
+      src: "templates/htaccess"
+      dest: "/home/pacs/{{pac}}/users/{{user}}/doms/{{domain}}/.htaccess"
+  - name: upload passenger wsgi file
+    become: yes
+    become_user: "{{pac}}-{{user}}"
+    template:
+      src: "templates/passenger_wsgi.py"
+      dest: "/home/pacs/{{pac}}/users/{{user}}/doms/{{domain}}/app-ssl/passenger_wsgi.py"
 
