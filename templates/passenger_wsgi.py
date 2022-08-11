@@ -1,1 +1,1 @@
-from isso.dispatch import application
+from isso.run import application

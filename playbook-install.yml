@@ -21,6 +21,12 @@
     file:
       path: "/home/pacs/{{pac}}/users/{{user}}/etc"
       state: directory
+  - name: create directory bin
+    become: yes
+    become_user: "{{pac}}-{{user}}"
+    file:
+      path: "/home/pacs/{{pac}}/users/{{user}}/bin"
+      state: directory
   - name: create directory var
     become: yes
     become_user: "{{pac}}-{{user}}"
@@ -60,22 +66,29 @@
     template:
       src: "templates/isso.conf"
       dest: "/home/pacs/{{pac}}/users/{{user}}/etc/isso.conf"
+  - name: upload restart script
+    become: yes
+    become_user: "{{pac}}-{{user}}"
+    template:
+      src: "templates/restart.sh"
+      dest: "/home/pacs/{{pac}}/users/{{user}}/bin/restart.sh"
+      mode: '0744'
 
   ########################
   ## setup the apache site
   ########################
-  - name: drop htdocs-ssl
+  - name: drop htdocs-ssl/.htaccess
     become: yes
     become_user: "{{pac}}-{{user}}"
     file:
-       path: "/home/pacs/{{pac}}/users/{{user}}/doms/{{domain}}/htdocs-ssl"
+       path: "/home/pacs/{{pac}}/users/{{user}}/doms/{{domain}}/htdocs-ssl/.htaccess"
        state: absent
-  - name: create symbolic link for htdocs-ssl
+  - name: create symbolic link for javascript
     become: yes
     become_user: "{{pac}}-{{user}}"
     file:
-      src: "/home/pacs/{{pac}}/users/{{user}}/isso/.venv/lib/python3.7/site-packages/isso"
-      dest: "/home/pacs/{{pac}}/users/{{user}}/doms/{{domain}}/htdocs-ssl"
+      src: "/home/pacs/{{pac}}/users/{{user}}/isso/.venv/lib/python3.7/site-packages/isso/js"
+      dest: "/home/pacs/{{pac}}/users/{{user}}/doms/{{domain}}/htdocs-ssl/js"
       state: link
   - name: upload .htaccess file
     become: yes
