@@ -40,6 +40,7 @@ Now we can reach our site for moderation of comments via:
 On https://blog.example.org, you can have an index.html with this content:
 
     <html>
+    <meta charset="utf-8">
     <body>
         <script data-isso="https://isso.example.org/"
             src="https://isso.example.org/js/embed.min.js"></script>
